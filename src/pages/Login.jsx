@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 
-const API = process.env.REACT_APP_API_URL;
+const API = import.meta.env.VITE_API_URL;
 
 export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
