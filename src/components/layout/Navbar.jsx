@@ -13,6 +13,7 @@ export const Navbar = () => {
     { name: 'Detect Now', path: '/detect', icon: Leaf },
     { name: 'History', path: '/history', icon: History },
     { name: 'Contact Us', path: '/contact', icon: Phone },
+    // { name: 'Admin', path: '/admin/messages', icon: Phone },
   ];
 
   return (

@@ -6,6 +6,10 @@ import { History, Trash2, Loader2, Cpu, Cloud } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
 import { useImageAnalysis } from '../hooks/useImageAnalysis';
 import { YOLOInferenceService } from '../services/inferenceService';
+// import { ExpertChatbot } from '../components/ExpertChatbot';
+
+const API = process.env.REACT_APP_API_URL;
+
 
 // Helper to create thumbnail
 const createThumbnail = (file) => {
@@ -76,16 +80,25 @@ export const DiseaseDetection = () => {
           setInferenceMode('cloud');
           setIsLocalAnalyzing(false);
           // Fallback
+          console.log("Selected file:", file);
+
           analysisResult = await analyzeImage(file);
         }
         setIsLocalAnalyzing(false);
       } else {
+        console.log("Selected file:", file);
+
         analysisResult = await analyzeImage(file);
       }
 
       const finalResult = {
         ...analysisResult,
-        thumbnail: thumbnail
+        thumbnail: thumbnail,
+        disease: analysisResult.disease || analysisResult.prediction,
+  confidence: analysisResult.confidence,
+  imageName: file.name,
+  date: new Date().toLocaleString(),
+  treatment: analysisResult.treatment || "No treatment available",
       };
 
       setResult(finalResult);
@@ -197,7 +210,7 @@ export const DiseaseDetection = () => {
         </div>
       </main>
 
-      {/* <ChatBot /> */}
+      {/* <ExpertChatbot /> */}
     </div>
   );
 };

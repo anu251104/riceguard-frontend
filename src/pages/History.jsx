@@ -20,10 +20,16 @@ export const History = () => {
     }
   };
 
-  const filteredHistory = history.filter(item => 
-    item.disease.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.date.includes(searchTerm)
+  const filteredHistory = history.filter(item => {
+  const disease = item.disease || item.prediction || '';
+  const date = item.date || '';
+
+  return (
+    disease.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    date.includes(searchTerm)
   );
+});
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -80,7 +86,8 @@ export const History = () => {
                     </div>
                   )}
                   <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold text-white ${item.disease === 'Healthy' ? 'bg-green-500' : 'bg-red-500'}`}>
-                    {item.disease}
+                    {item.disease || item.prediction || 'Unknown'}
+
                   </div>
                 </div>
                 
@@ -91,7 +98,7 @@ export const History = () => {
                       <span>{item.date}</span>
                     </div>
                     <span className="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
-                      {(item.confidence * 100).toFixed(0)}% Confidence
+                      {(item.confidence ).toFixed(0)}% Confidence
                     </span>
                   </div>
                   

@@ -1,65 +1,40 @@
-import { useState } from 'react';
-import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { z } from 'zod';
+import { useState } from "react";
 
-// Define the schema for disease detection
-const detectionSchema = z.object({
-  disease: z.string().describe('The name of the detected rice disease or "Healthy"'),
-  confidence: z.number().min(0).max(1).describe('Confidence score between 0 and 1'),
-  treatment: z.string().describe('Recommended sustainable/organic treatment and remedy'),
-});
+const API = process.env.REACT_APP_API_URL;
 
-export function useImageAnalysis(sceneName = 'disease_detector') {
+export function useImageAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const analyzeImage = async (imageFile) => {
+  const analyzeImage = async (file) => {
     setIsAnalyzing(true);
 
     try {
-      // Convert file to base64
-      const reader = new FileReader();
-      const base64Image = await new Promise((resolve, reject) => {
-        reader.onload = (e) => resolve(e.target?.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
+      const formData = new FormData();
+      formData.append("file", file); // MUST be "file"
+
+      const response = await fetch(`${API}/analyze`, {
+        method: "POST",
+        body: formData,
       });
 
-      const config = globalThis.ywConfig?.ai_config?.[sceneName];
-      if (!config) {
-        throw new Error(`API Error - Configuration '${sceneName}' not found`);
+      // 🔥 LOG RAW RESPONSE FOR DEBUG
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Backend error:", text);
+        throw new Error(text);
       }
 
-      const openai = createOpenAI({
-        baseURL: 'https://api.youware.com/public/v1/ai',
-        apiKey: 'sk-YOUWARE'
-      });
-
-      const result = await generateObject({
-        model: openai(config.model),
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: config.system_prompt || 'Analyze this image.' },
-              { type: 'image', image: base64Image }
-            ]
-          }
-        ],
-        schema: detectionSchema,
-        temperature: config.temperature || 0.1,
-      });
+      const result = await response.json();
 
       return {
-        ...result.object,
-        imageName: imageFile.name,
+        ...result,
+        imageName: file.name,
         date: new Date().toLocaleString(),
-        thumbnail: base64Image // Use the base64 as thumbnail
       };
-
     } catch (error) {
-      console.error('Analysis failed:', error);
-      throw new Error(error.message || 'Failed to analyze image');
+      console.error("Analysis failed:", error);
+      alert("Failed to analyze image. Backend returned an error.");
+      throw error;
     } finally {
       setIsAnalyzing(false);
     }

@@ -5,17 +5,22 @@ import { History } from './pages/History';
 import { Contact } from './pages/Contact';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
+import { AdminMessages } from "./pages/AdminMessages";
+
 
 function App() {
   return (
     <Router>
       <Routes>
+       
         <Route path="/" element={<Home />} />
         <Route path="/detect" element={<DiseaseDetection />} />
         <Route path="/history" element={<History />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/admin/messages" element={<AdminMessages />} />
+
       </Routes>
     </Router>
   );

@@ -12,30 +12,42 @@ export const ResultCard = ({ result, isLoading }) => {
     );
   }
 
-  if (!result) return null;
+  // ✅ SAFETY CHECK (VERY IMPORTANT)
+  if (!result || !result.prediction) return null;
 
-  const isHealthy = result.disease.toLowerCase() === 'healthy';
-  const isUnknown = result.disease.toLowerCase() === 'unknown';
+  const disease = result.prediction.toLowerCase();
+  const confidence = result.confidence ?? 0;
+
+  const isHealthy = disease === 'healthy';
+  const isUnknown = disease === 'unknown';
 
   return (
     <div className="w-full max-w-md mx-auto mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-      <div className={`p-4 ${isHealthy ? 'bg-green-500' : isUnknown ? 'bg-gray-500' : 'bg-red-500'} text-white flex items-center justify-between`}>
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          {isHealthy ? <CheckCircle /> : isUnknown ? <AlertCircle /> : <AlertCircle />}
-          {result.disease}
+      <div
+        className={`p-4 ${
+          isHealthy ? 'bg-green-500' : isUnknown ? 'bg-gray-500' : 'bg-red-500'
+        } text-white flex items-center justify-between`}
+      >
+        <h3 className="text-xl font-bold flex items-center gap-2 capitalize">
+          {isHealthy ? <CheckCircle /> : <AlertCircle />}
+          {disease.replaceAll('_', ' ')}
         </h3>
+
         <span className="text-sm font-medium bg-white/20 px-2 py-1 rounded">
-          {(result.confidence * 100).toFixed(1)}% Confidence
+          {confidence}% Confidence
         </span>
       </div>
-      
+
       <div className="p-6">
         <h4 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-200">
           <Info size={20} className="text-blue-500" />
-          Treatment & Advice
+          Advice
         </h4>
+
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          {result.treatment}
+          {isHealthy
+            ? 'Your rice plant appears healthy. Continue regular monitoring and good farming practices.'
+            : 'This disease was detected by the model. Consider consulting an agricultural expert for proper treatment.'}
         </p>
       </div>
     </div>

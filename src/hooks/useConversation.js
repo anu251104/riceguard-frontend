@@ -1,51 +1,56 @@
-import { useState, useCallback } from 'react';
-import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { useState, useCallback } from "react";
 
-export function useConversation(sceneName = 'chat_assistant') {
+const API = process.env.REACT_APP_API_URL;
+
+
+export function useConversation() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = useCallback(async (userMessage, variables = {}) => {
-    const config = globalThis.ywConfig?.ai_config?.[sceneName];
-    if (!config) {
-      throw new Error(`API Error - Configuration '${sceneName}' not found`);
-    }
-
+  const sendMessage = useCallback(async (userMessage) => {
     setIsLoading(true);
 
-    // Add user message to history
-    const newUserMessage = { role: 'user', content: userMessage };
-    setConversationHistory(prev => [...prev, newUserMessage]);
+    // Build updated history first
+    const updatedHistory = [
+      ...conversationHistory,
+      { role: "user", content: userMessage },
+    ];
 
-    const openai = createOpenAI({
-      baseURL: 'https://api.youware.com/public/v1/ai',
-      apiKey: 'sk-YOUWARE'
-    });
+    // Optimistically update UI
+    setConversationHistory(updatedHistory);
 
     try {
-      const { text } = await generateText({
-        model: openai(config.model),
-        messages: [
-          ...(config.system_prompt ? [{ role: 'system', content: typeof config.system_prompt === 'function' ? config.system_prompt(variables) : config.system_prompt }] : []),
-          ...conversationHistory, // Include full conversation context
-          newUserMessage
-        ],
-        temperature: config.temperature || 0.7,
-        maxTokens: config.maxTokens || 4000
+      const response = await fetch(`${API}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMessage,
+          history: updatedHistory,
+        }),
       });
 
-      // Add AI response to history
-      const assistantMessage = { role: 'assistant', content: text };
-      setConversationHistory(prev => [...prev, assistantMessage]);
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
 
-      return text;
-    } catch (error) {
-      throw new Error(`API Error - Conversation failed: ${error.message}`);
+      const data = await response.json();
+
+      const assistantMessage = {
+        role: "assistant",
+        content: data.response,
+      };
+
+      setConversationHistory((prev) => [...prev, assistantMessage]);
+
+      return data.response;
+    } catch (err) {
+      console.error("Chat failed:", err);
+      alert("Chat failed. Check backend.");
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  }, [sceneName, conversationHistory]);
+  }, [conversationHistory]);
 
   const resetConversation = useCallback(() => {
     setConversationHistory([]);
@@ -55,6 +60,6 @@ export function useConversation(sceneName = 'chat_assistant') {
     conversationHistory,
     sendMessage,
     resetConversation,
-    isLoading
+    isLoading,
   };
 }

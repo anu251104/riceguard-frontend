@@ -2,18 +2,41 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
+const API = process.env.REACT_APP_API_URL;
+
 export const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+ const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  // 🔹 MODIFIED: real API call
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      const response = await fetch(`${API}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Signup failed');
+      }
+      
+
       navigate('/detect');
-    }, 1500);
+    } catch (error) {
+      alert('Signup failed. Try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,6 +76,10 @@ export const SignUp = () => {
                   required
                   className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2"
                   placeholder="John Doe"
+                  value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
                 />
               </div>
             </div>
@@ -73,6 +100,10 @@ export const SignUp = () => {
                   required
                   className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2"
                   placeholder="you@example.com"
+                  value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
                 />
               </div>
             </div>
@@ -93,6 +124,10 @@ export const SignUp = () => {
                   required
                   className="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2"
                   placeholder="••••••••"
+                   value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
                 />
               </div>
             </div>

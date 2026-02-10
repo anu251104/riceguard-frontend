@@ -40,7 +40,7 @@ const HeroSection = ({ onPrimaryClick }) => {
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-white/40">Diseases</dt>
-              <dd className="mt-1 text-lg font-semibold text-white">5 Types</dd>
+              <dd className="mt-1 text-lg font-semibold text-white">7 Types</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-white/40">Support</dt>
