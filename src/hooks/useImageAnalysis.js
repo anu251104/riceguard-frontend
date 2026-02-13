@@ -12,7 +12,7 @@ export function useImageAnalysis() {
       const formData = new FormData();
       formData.append("file", file); // MUST be "file"
 
-      const response = await fetch(`${API}/analyze`, {
+      const response = await fetch('http://127.0.0.1:8000/analyze', {
         method: "POST",
         body: formData,
       });

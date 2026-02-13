@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ImageUpload } from '../components/detection/ImageUpload';
 import { ResultCard } from '../components/detection/ResultCard';
-// import { ChatBot } from '../components/chat/ChatBot';
+import { ChatBot } from '../components/chat/ChatBot';
 import { History, Trash2, Loader2, Cpu, Cloud } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
 import { useImageAnalysis } from '../hooks/useImageAnalysis';
 import { YOLOInferenceService } from '../services/inferenceService';
 // import { ExpertChatbot } from '../components/ExpertChatbot';
+// import {Chatbot} from '../pages/ChatBot'
 
-const API = process.env.REACT_APP_API_URL;
 
 
 // Helper to create thumbnail
@@ -47,14 +47,16 @@ export const DiseaseDetection = () => {
   const { analyzeImage, isAnalyzing: isCloudAnalyzing } = useImageAnalysis();
   const [isLocalAnalyzing, setIsLocalAnalyzing] = useState(false);
 
-  useEffect(() => {
-    const savedHistory = localStorage.getItem('detectionHistory');
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory));
-    }
-    // Attempt to load local model to see if it exists
-    yoloService.loadModel().then(() => setInferenceMode('local')).catch(() => setInferenceMode('cloud'));
-  }, []);
+ useEffect(() => {
+  const savedHistory = localStorage.getItem('detectionHistory');
+  if (savedHistory) {
+    setHistory(JSON.parse(savedHistory));
+  }
+
+  // Do NOT auto-load YOLO here
+  setInferenceMode('cloud'); // default
+}, []);
+
 
   const handleImageSelect = async (file) => {
     setSelectedImage(file);
@@ -65,31 +67,34 @@ export const DiseaseDetection = () => {
       let analysisResult;
 
       if (inferenceMode === 'local') {
-        setIsLocalAnalyzing(true);
-        try {
-          analysisResult = await yoloService.runInference(file);
-          // Add date/imageName manually since YOLO service returns raw prediction
-          analysisResult = {
-            ...analysisResult,
-            imageName: file.name,
-            date: new Date().toLocaleString(),
-            thumbnail
-          };
-        } catch (e) {
-          console.warn("Local inference failed, falling back to cloud", e);
-          setInferenceMode('cloud');
-          setIsLocalAnalyzing(false);
-          // Fallback
-          console.log("Selected file:", file);
+  setIsLocalAnalyzing(true);
 
-          analysisResult = await analyzeImage(file);
-        }
-        setIsLocalAnalyzing(false);
-      } else {
-        console.log("Selected file:", file);
+  try {
+    // Load model only if not loaded yet
+    if (!yoloService.model) {
+      await yoloService.loadModel();
+    }
 
-        analysisResult = await analyzeImage(file);
-      }
+    analysisResult = await yoloService.runInference(file);
+
+    analysisResult = {
+      ...analysisResult,
+      imageName: file.name,
+      date: new Date().toLocaleString(),
+      thumbnail
+    };
+
+  } catch (e) {
+    console.warn("Local inference failed, switching to cloud", e);
+    setInferenceMode('cloud');
+    analysisResult = await analyzeImage(file);
+  }
+
+  setIsLocalAnalyzing(false);
+
+} else {
+  analysisResult = await analyzeImage(file);
+} 
 
       const finalResult = {
         ...analysisResult,
@@ -98,7 +103,10 @@ export const DiseaseDetection = () => {
   confidence: analysisResult.confidence,
   imageName: file.name,
   date: new Date().toLocaleString(),
-  treatment: analysisResult.treatment || "No treatment available",
+  treatment: analysisResult.treatment || {
+  chemical: [],
+  organic: []
+},
       };
 
       setResult(finalResult);
@@ -139,7 +147,7 @@ export const DiseaseDetection = () => {
                 {inferenceMode === 'local' ? (
                   <><Cpu size={14} className="text-blue-500" /> Local Model (YOLOv8)</>
                 ) : (
-                  <><Cloud size={14} className="text-green-500" /> Cloud AI (Gemini)</>
+                  <><Cloud size={14} className="text-green-500" /> </>
                 )}
               </div>
 
@@ -210,7 +218,8 @@ export const DiseaseDetection = () => {
         </div>
       </main>
 
-      {/* <ExpertChatbot /> */}
+     <ChatBot  />
+
     </div>
   );
 };

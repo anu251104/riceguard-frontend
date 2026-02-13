@@ -102,12 +102,36 @@ export const History = () => {
                     </span>
                   </div>
                   
-                  <div className="mt-auto">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Remedy:</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                      {item.treatment}
-                    </p>
-                  </div>
+                  <div className="mt-auto space-y-3">
+  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+    Treatment:
+  </h4>
+
+  {/* Chemical */}
+  {item.treatment?.chemical?.length > 0 && (
+    <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded text-xs">
+      <span className="font-semibold text-red-600">Chemical:</span>
+      <ul className="list-disc list-inside mt-1 space-y-1 text-gray-700 dark:text-gray-300">
+        {item.treatment.chemical.slice(0, 2).map((remedy, i) => (
+          <li key={i}>{remedy}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {/* Organic */}
+  {item.treatment?.organic?.length > 0 && (
+    <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded text-xs">
+      <span className="font-semibold text-green-600">Organic:</span>
+      <ul className="list-disc list-inside mt-1 space-y-1 text-gray-700 dark:text-gray-300">
+        {item.treatment.organic.slice(0, 2).map((remedy, i) => (
+          <li key={i}>{remedy}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+</div>
+
                 </div>
               </div>
             ))}

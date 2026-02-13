@@ -1,51 +1,61 @@
 import { useState, useCallback } from "react";
 
-const API = import.meta.env.VITE_API_URL;
-
+const API = "http://127.0.0.1:8000";
 
 export function useConversation() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = useCallback(async (userMessage) => {
+    if (!userMessage.trim()) return;
+
     setIsLoading(true);
 
-    // Build updated history first
     const updatedHistory = [
       ...conversationHistory,
       { role: "user", content: userMessage },
     ];
 
-    // Optimistically update UI
     setConversationHistory(updatedHistory);
 
     try {
-      const response = await fetch(`${API}/analyze`, {
+      const response = await fetch(`${API}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage,
-          history: updatedHistory,
+          body: JSON.stringify({
+  message: userMessage,
+  history: updatedHistory
+})
+,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       const data = await response.json();
 
       const assistantMessage = {
         role: "assistant",
-        content: data.response,
+        content: data.reply,   // ✅ MUST match backend key
       };
 
       setConversationHistory((prev) => [...prev, assistantMessage]);
 
-      return data.response;
+      return data.reply;
+
     } catch (err) {
       console.error("Chat failed:", err);
-      alert("Chat failed. Check backend.");
+
+      setConversationHistory((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I couldn't fetch expert advice.",
+        },
+      ]);
+
       throw err;
     } finally {
       setIsLoading(false);
@@ -56,10 +66,5 @@ export function useConversation() {
     setConversationHistory([]);
   }, []);
 
-  return {
-    conversationHistory,
-    sendMessage,
-    resetConversation,
-    isLoading,
-  };
+  return { conversationHistory, sendMessage, resetConversation, isLoading };
 }

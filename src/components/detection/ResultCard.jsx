@@ -12,7 +12,6 @@ export const ResultCard = ({ result, isLoading }) => {
     );
   }
 
-  // ✅ SAFETY CHECK (VERY IMPORTANT)
   if (!result || !result.prediction) return null;
 
   const disease = result.prediction.toLowerCase();
@@ -23,6 +22,8 @@ export const ResultCard = ({ result, isLoading }) => {
 
   return (
     <div className="w-full max-w-md mx-auto mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+      
+      {/* Header */}
       <div
         className={`p-4 ${
           isHealthy ? 'bg-green-500' : isUnknown ? 'bg-gray-500' : 'bg-red-500'
@@ -38,17 +39,57 @@ export const ResultCard = ({ result, isLoading }) => {
         </span>
       </div>
 
-      <div className="p-6">
-        <h4 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-          <Info size={20} className="text-blue-500" />
-          Advice
-        </h4>
+      <div className="p-6 space-y-6">
 
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          {isHealthy
-            ? 'Your rice plant appears healthy. Continue regular monitoring and good farming practices.'
-            : 'This disease was detected by the model. Consider consulting an agricultural expert for proper treatment.'}
-        </p>
+        {/* General Advice */}
+        <div>
+          <h4 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+            <Info size={20} className="text-blue-500" />
+            Advice
+          </h4>
+
+          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            {isHealthy
+              ? 'Your rice plant appears healthy. Continue regular monitoring and good farming practices.'
+              : 'This disease was detected by the model. Follow the treatment recommendations below.'}
+          </p>
+        </div>
+
+        {/* 🔴 Chemical Treatment */}
+        {!isHealthy && result.treatment?.chemical?.length > 0 && (
+          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+            <h4 className="font-semibold text-red-600 mb-2">
+              Chemical Treatment
+            </h4>
+            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-gray-300">
+              {result.treatment.chemical.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* 🟢 Organic Remedies */}
+        {!isHealthy && result.treatment?.organic?.length > 0 && (
+          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+            <h4 className="font-semibold text-green-600 mb-2">
+              Organic Remedies
+            </h4>
+            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-gray-300">
+              {result.treatment.organic.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ⚠ Disclaimer */}
+        {!isHealthy && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            ⚠ Always consult a local agricultural officer before applying pesticides.
+          </p>
+        )}
+
       </div>
     </div>
   );
