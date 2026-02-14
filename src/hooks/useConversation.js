@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 
-const API = "http://127.0.0.1:8000";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 export function useConversation() {
   const [conversationHistory, setConversationHistory] = useState([]);
@@ -19,7 +20,7 @@ export function useConversation() {
     setConversationHistory(updatedHistory);
 
     try {
-      const response = await fetch(`${API}/chat`, {
+      const response = await fetch(`${BASE_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

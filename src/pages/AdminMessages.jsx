@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Navbar } from "../components/layout/Navbar";
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 export const AdminMessages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/admin/messages")
+    fetch(`${BASE_URL}/admin/messages`)
       .then(res => res.json())
       .then(data => {
         setMessages(data);

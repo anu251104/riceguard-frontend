@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ export const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/signup', {
+      const response = await fetch(`${BASE_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

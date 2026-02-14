@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const API = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 export function useImageAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -12,7 +13,7 @@ export function useImageAnalysis() {
       const formData = new FormData();
       formData.append("file", file); // MUST be "file"
 
-      const response = await fetch('http://127.0.0.1:8000/analyze', {
+      const response = await fetch(`${BASE_URL}/analyze`, {
         method: "POST",
         body: formData,
       });

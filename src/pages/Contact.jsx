@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
 
-const API = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const Contact = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +21,7 @@ export const Contact = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/contact', {
+      const response = await fetch(`${BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
